@@ -1,5 +1,12 @@
 {
+    "name": "saas-starter",
     "private": true,
+    "author": "jlerocher",
+    "version": "1.0.0",
+    "engines": {
+        "node": ">=20.0.0"
+    },
+    "packageManager": "pnpm@9.15.5",
     "scripts": {
         "dev": "next dev --turbopack",
         "build": "next build",
