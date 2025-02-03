@@ -12,7 +12,7 @@
         "build": "next build",
         "start": "next start",
         "format": "prettier --write .",
-        "db:setup": "npx tsx lib/db/setup.ts",
+        "db:setup": "npx tsx lib/db/project-setup.ts",
         "db:seed": "npx tsx lib/db/seed.ts",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
