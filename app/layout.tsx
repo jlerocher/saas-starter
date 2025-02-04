@@ -25,9 +25,10 @@ export default function RootLayout({
     return (
         <html
             lang="en"
-            className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
+            className={`bg-background text-foreground ${manrope.className}`}
+            suppressHydrationWarning
         >
-            <body className="min-h-[100dvh] bg-gray-50">
+            <body className="min-h-[100dvh]">
                 <UserProvider userPromise={userPromise}>
                     {children}
                 </UserProvider>
