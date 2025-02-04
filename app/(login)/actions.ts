@@ -49,6 +49,55 @@ const signInSchema = z.object({
     password: z.string().min(8).max(100),
 });
 
+const signUpSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    inviteId: z.string().optional(),
+});
+
+const updatePasswordSchema = z
+    .object({
+        currentPassword: z.string().min(8).max(100),
+        newPassword: z.string().min(8).max(100),
+        confirmPassword: z.string().min(8).max(100),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+        message: "Passwords don't match",
+        path: ["confirmPassword"],
+    });
+
+const deleteAccountSchema = z.object({
+    password: z.string().min(8).max(100),
+});
+
+const updateAccountSchema = z.object({
+    name: z.string().min(1, "Name is required").max(100),
+    email: z.string().email("Invalid email address"),
+});
+
+const removeTeamMemberSchema = z.object({
+    memberId: z.number(),
+});
+
+const inviteTeamMemberSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    role: z.enum(["MEMBER", "OWNER", "ADMIN"]),
+});
+
+/**
+ * Handles the sign-in process for a user.
+ *
+ * @param data - The validated data containing the user's email and password.
+ * @param formData - The form data containing additional information such as redirect and priceId.
+ * @returns An object containing an error message if the sign-in fails, or initiates a session and redirects the user upon successful sign-in.
+ *
+ * The function performs the following steps:
+ * 1. Retrieves the user and associated team from the database based on the provided email.
+ * 2. Checks if the user exists and if the provided password is valid.
+ * 3. If the user does not exist or the password is invalid, returns an error message.
+ * 4. If the user exists and the password is valid, sets the session and logs the sign-in activity.
+ * 5. Redirects the user to the appropriate page based on the form data.
+ */
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
     const { email, password } = data;
 
@@ -100,12 +149,19 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     redirect("/dashboard");
 });
 
-const signUpSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-    inviteId: z.string().optional(),
-});
-
+/**
+ * Handles the sign-up process for a new user.
+ *
+ * @param {Object} data - The validated data from the sign-up form.
+ * @param {string} data.email - The email address of the new user.
+ * @param {string} data.password - The password for the new user.
+ * @param {string} [data.inviteId] - The optional invitation ID if the user is signing up via an invitation.
+ * @param {FormData} formData - The form data containing additional information.
+ *
+ * @returns {Promise<Object>} The result of the sign-up process, which may include an error message or a redirect.
+ *
+ * @throws {Error} If there is an issue with database operations or hashing the password.
+ */
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     const { email, password, inviteId } = data;
 
@@ -241,17 +297,21 @@ export async function signOut(): Promise<void> {
     (await cookies()).delete("session");
 }
 
-const updatePasswordSchema = z
-    .object({
-        currentPassword: z.string().min(8).max(100),
-        newPassword: z.string().min(8).max(100),
-        confirmPassword: z.string().min(8).max(100),
-    })
-    .refine((data) => data.newPassword === data.confirmPassword, {
-        message: "Passwords don't match",
-        path: ["confirmPassword"],
-    });
-
+/**
+ * Updates the user's password after validating the current password and ensuring the new password is different.
+ *
+ * @param {Object} data - The data containing the current and new passwords.
+ * @param {string} data.currentPassword - The user's current password.
+ * @param {string} data.newPassword - The user's new password.
+ * @param {Object} _ - Placeholder for additional arguments (not used).
+ * @param {Object} user - The user object containing user details.
+ * @param {string} user.passwordHash - The hashed password of the user.
+ * @param {string} user.id - The ID of the user.
+ *
+ * @returns {Promise<Object>} - An object indicating the success or failure of the password update.
+ * @returns {Object} error - An error message if the current password is incorrect or the new password is the same as the current password.
+ * @returns {Object} success - A success message if the password is updated successfully.
+ */
 export const updatePassword = validatedActionWithUser(
     updatePasswordSchema,
     async (data, _, user) => {
@@ -291,10 +351,24 @@ export const updatePassword = validatedActionWithUser(
     },
 );
 
-const deleteAccountSchema = z.object({
-    password: z.string().min(8).max(100),
-});
-
+/**
+ * Deletes a user account after validating the provided password.
+ *
+ * @param {object} data - The data containing the password for validation.
+ * @param {object} _ - Unused parameter.
+ * @param {object} user - The user object containing user details.
+ *
+ * @returns {Promise<object>} - An object containing an error message if the password is incorrect.
+ *
+ * @throws {Error} - Throws an error if the account deletion process fails.
+ *
+ * The function performs the following steps:
+ * 1. Validates the provided password against the stored password hash.
+ * 2. Logs the account deletion activity.
+ * 3. Soft deletes the user account by setting the `deletedAt` timestamp and modifying the email to ensure uniqueness.
+ * 4. Removes the user from their team if they belong to one.
+ * 5. Deletes the session cookie and redirects the user to the sign-in page.
+ */
 export const deleteAccount = validatedActionWithUser(
     deleteAccountSchema,
     async (data, _, user) => {
@@ -341,11 +415,18 @@ export const deleteAccount = validatedActionWithUser(
     },
 );
 
-const updateAccountSchema = z.object({
-    name: z.string().min(1, "Name is required").max(100),
-    email: z.string().email("Invalid email address"),
-});
-
+/**
+ * Updates the account information for a user.
+ *
+ * This function validates the provided data against the `updateAccountSchema`
+ * and then updates the user's account information in the database. It also logs
+ * the activity of updating the account.
+ *
+ * @param data - The data containing the new account information (name and email).
+ * @param _ - Unused parameter.
+ * @param user - The user object containing the user's ID.
+ * @returns An object indicating the success of the account update.
+ */
 export const updateAccount = validatedActionWithUser(
     updateAccountSchema,
     async (data, _, user) => {
@@ -365,10 +446,18 @@ export const updateAccount = validatedActionWithUser(
     },
 );
 
-const removeTeamMemberSchema = z.object({
-    memberId: z.number(),
-});
-
+/**
+ * Removes a team member from the user's team.
+ *
+ * This function validates the action using `removeTeamMemberSchema` and ensures that the user is part of a team.
+ * If the user is not part of a team, it returns an error message.
+ * Otherwise, it deletes the team member from the database and logs the activity.
+ *
+ * @param data - The data containing the member ID to be removed.
+ * @param _ - Unused parameter.
+ * @param user - The user performing the action.
+ * @returns An object indicating the success or failure of the operation.
+ */
 export const removeTeamMember = validatedActionWithUser(
     removeTeamMemberSchema,
     async (data, _, user) => {
@@ -398,11 +487,19 @@ export const removeTeamMember = validatedActionWithUser(
     },
 );
 
-const inviteTeamMemberSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    role: z.enum(["MEMBER", "OWNER", "ADMIN"]),
-});
-
+/**
+ * Invites a team member to join the user's team.
+ *
+ * This function validates the input data using `inviteTeamMemberSchema` and checks if the user is part of a team.
+ * If the user is not part of a team, it returns an error. It also checks if the user to be invited is already a member
+ * of the team or if an invitation has already been sent to the email. If either condition is met, it returns an error.
+ * Otherwise, it creates a new invitation and logs the activity.
+ *
+ * @param data - The data containing the email and role of the team member to be invited.
+ * @param _ - Unused parameter.
+ * @param user - The user who is inviting the team member.
+ * @returns An object containing either an error message or a success message.
+ */
 export const inviteTeamMember = validatedActionWithUser(
     inviteTeamMemberSchema,
     async (data, _, user) => {
