@@ -15,6 +15,7 @@ import { CircleIcon, Home, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
+import { ModeToggle } from "../ui/mode-toggle";
 
 export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,6 +45,7 @@ export function Header() {
                     >
                         Pricing
                     </Link>
+                    <ModeToggle />
                     {user ? (
                         <DropdownMenu
                             open={isMenuOpen}
