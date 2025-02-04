@@ -27,7 +27,7 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
     return (
         <section className="flex-1 p-4 lg:p-8">
             <h1 className="text-lg lg:text-2xl font-medium mb-6">
-                Team Settings
+                {teamData.name} | Team Settings
             </h1>
             <Card className="mb-8">
                 <CardHeader>
@@ -72,10 +72,11 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
                                 <div className="flex items-center space-x-4">
                                     <Avatar>
                                         <AvatarImage
-                                            src={`/placeholder.svg?height=32&width=32`}
-                                            alt={getUserDisplayName(
-                                                member.user,
-                                            )}
+                                            src={
+                                                member.user.avatarUrl ||
+                                                undefined
+                                            }
+                                            alt={member.user.name + " avatar"}
                                         />
                                         <AvatarFallback>
                                             {getUserDisplayName(member.user)

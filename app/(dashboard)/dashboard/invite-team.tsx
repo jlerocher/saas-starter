@@ -24,7 +24,7 @@ type ActionState = {
 export function InviteTeamMember() {
     const { userPromise } = useUser();
     const user = use(userPromise);
-    const isOwner = user?.role === "owner";
+    const isOwner = user?.role === "OWNER";
     const [inviteState, inviteAction, isInvitePending] = useActionState<
         ActionState,
         FormData
@@ -33,11 +33,11 @@ export function InviteTeamMember() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Invite Team Member</CardTitle>
+                <CardTitle>Add another team member</CardTitle>
             </CardHeader>
             <CardContent>
-                <form action={inviteAction} className="space-y-4">
-                    <div>
+                <form action={inviteAction} className="flex flex-col space-y-5">
+                    <div className="">
                         <Label htmlFor="email">Email</Label>
                         <Input
                             id="email"
@@ -48,7 +48,7 @@ export function InviteTeamMember() {
                             disabled={!isOwner}
                         />
                     </div>
-                    <div>
+                    <div className="">
                         <Label>Role</Label>
                         <RadioGroup
                             defaultValue="member"
