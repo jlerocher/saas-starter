@@ -19,7 +19,7 @@ const UserContext = createContext<UserContextType | null>(null);
  * @throws {Error} If the hook is used outside of a `UserProvider`.
  */
 export function useUser(): UserContextType {
-    let context = useContext(UserContext);
+    const context = useContext(UserContext);
     if (context === null) {
         throw new Error("useUser must be used within a UserProvider");
     }
