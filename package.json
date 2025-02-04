@@ -6,7 +6,7 @@
     "engines": {
         "node": ">=20.0.0"
     },
-    "packageManager": ">=pnpm@9.15.5",
+    "packageManager": "pnpm@9.15.5",
     "scripts": {
         "dev": "next dev --turbopack",
         "build": "next build",
@@ -58,6 +58,8 @@
         "zod": "^3.24.1"
     },
     "devDependencies": {
+        "eslint": "^9",
+        "eslint-config-next": "15.1.6",
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11"

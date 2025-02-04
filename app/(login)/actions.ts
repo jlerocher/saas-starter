@@ -128,7 +128,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     const newUser: NewUser = {
         email,
         passwordHash,
-        role: "owner", // Default role, will be overridden if there's an invitation
+        role: "OWNER", // Default role, will be overridden if there's an invitation
     };
 
     const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -142,7 +142,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     }
 
     let teamId: number;
-    let userRole: string;
+    let userRole: "MEMBER" | "ADMIN" | "OWNER";
     let createdTeam: typeof teams.$inferSelect | null = null;
 
     if (inviteId) {
@@ -199,7 +199,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         }
 
         teamId = createdTeam.id;
-        userRole = "owner";
+        userRole = "OWNER";
 
         await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
     }
@@ -225,7 +225,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     redirect("/dashboard");
 });
 
-export async function signOut() {
+/**
+ * Signs out the current user by performing the following actions:
+ * 1. Retrieves the current user.
+ * 2. Retrieves the user's team information.
+ * 3. Logs the sign-out activity for the user and their team.
+ * 4. Deletes the session cookie.
+ *
+ * @returns {Promise<void>} A promise that resolves when the sign-out process is complete.
+ */
+export async function signOut(): Promise<void> {
     const user = (await getUser()) as User;
     const userWithTeam = await getUserWithTeam(user.id);
     await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
@@ -391,7 +400,7 @@ export const removeTeamMember = validatedActionWithUser(
 
 const inviteTeamMemberSchema = z.object({
     email: z.string().email("Invalid email address"),
-    role: z.enum(["member", "owner"]),
+    role: z.enum(["MEMBER", "OWNER", "ADMIN"]),
 });
 
 export const inviteTeamMember = validatedActionWithUser(
@@ -443,7 +452,7 @@ export const inviteTeamMember = validatedActionWithUser(
         await db.insert(invitations).values({
             teamId: userWithTeam.teamId,
             email,
-            role,
+            role: role.toUpperCase() as "MEMBER" | "ADMIN" | "OWNER",
             invitedBy: user.id,
             status: "pending",
         });
