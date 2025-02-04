@@ -6,12 +6,13 @@
     "engines": {
         "node": ">=20.0.0"
     },
-    "packageManager": "pnpm@9.15.5",
+    "packageManager": ">=pnpm@9.15.5",
     "scripts": {
         "dev": "next dev --turbopack",
         "build": "next build",
         "start": "next start",
         "format": "prettier --write .",
+        "lint": "next lint",
         "db:setup": "npx tsx lib/db/project-setup.ts",
         "db:seed": "npx tsx lib/db/seed.ts",
         "db:generate": "drizzle-kit generate",
