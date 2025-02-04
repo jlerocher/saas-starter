@@ -16,6 +16,7 @@
         "db:seed": "npx tsx lib/db/seed.ts",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
+        "db:push": "drizzle-kit push --config=drizzle.config.ts",
         "db:studio": "drizzle-kit studio"
     },
     "dependencies": {
