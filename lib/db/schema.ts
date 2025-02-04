@@ -8,6 +8,8 @@ import {
     varchar,
 } from "drizzle-orm/pg-core";
 
+const userRole = ["MEMBER", "ADMIN", "OWNER"] as const;
+
 export const users = pgTable("users", {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 100 }),
@@ -22,7 +24,9 @@ export const users = pgTable("users", {
     emailVerified: timestamp("email_verified"),
     passwordHash: text("password_hash").notNull(),
     failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
-    role: varchar("role", { length: 20 }).notNull().default("member"),
+    role: varchar("role", { length: 20, enum: userRole })
+        .notNull()
+        .default("MEMBER"),
     lastLogin: timestamp("last_login"),
     lastIp: varchar("last_ip", { length: 45 }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -50,7 +54,9 @@ export const teamMembers = pgTable("team_members", {
     teamId: integer("team_id")
         .notNull()
         .references(() => teams.id),
-    role: varchar("role", { length: 50 }).notNull(),
+    role: varchar("role", { length: 50, enum: userRole })
+        .notNull()
+        .default("MEMBER"),
     joinedAt: timestamp("joined_at").notNull().defaultNow(),
 });
 
@@ -71,7 +77,9 @@ export const invitations = pgTable("invitations", {
         .notNull()
         .references(() => teams.id),
     email: varchar("email", { length: 255 }).notNull(),
-    role: varchar("role", { length: 50 }).notNull(),
+    role: varchar("role", { length: 50, enum: userRole })
+        .notNull()
+        .default("MEMBER"),
     invitedBy: integer("invited_by")
         .notNull()
         .references(() => users.id),
@@ -138,6 +146,7 @@ export type TeamDataWithMembers = Team & {
         user: Pick<User, "id" | "name" | "email">;
     })[];
 };
+export type UserRoles = typeof userRole;
 
 export enum ActivityType {
     SIGN_UP = "SIGN_UP",
