@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { startTransition, use, useActionState } from "react";
 
 type ActionState = {
@@ -46,8 +47,15 @@ export default function GeneralPage() {
                 <CardHeader>
                     <CardTitle>Account Information</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <form className="space-y-4" onSubmit={handleSubmit}>
+                <CardContent className="flex flex-col items-center space-y-4 md:flex-row md:space-x-6 md:place-items-center">
+                    <Image
+                        src={user?.avatarUrl || "/avatar.png"}
+                        width={200}
+                        height={200}
+                        className="rounded-full"
+                        alt={user?.name + "profile pic"}
+                    />
+                    <form className="space-y-4 w-full" onSubmit={handleSubmit}>
                         <div>
                             <Label htmlFor="name">Name</Label>
                             <Input
@@ -81,7 +89,7 @@ export default function GeneralPage() {
                         )}
                         <Button
                             type="submit"
-                            className="bg-orange-500 hover:bg-orange-600 text-white"
+                            className="text-white"
                             disabled={isPending}
                         >
                             {isPending ? (
